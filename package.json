@@ -1,0 +1,22 @@
+{
+  "name": "Project-Reborn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "Main.js",
+  "dependencies": {},
+  "devDependencies": {
+    "babelify": "^6.3.0",
+    "browserify": "^12.0.0",
+    "gulp": "^3.9.0",
+    "gulp-rename": "^1.2.2",
+    "mysql": "^2.9.0",
+    "through2": "^2.0.0",
+    "socket-anti-spam": "^0.1.6",
+    "socket.io": "^1.3.5"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
