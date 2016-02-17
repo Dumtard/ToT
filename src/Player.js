@@ -3,6 +3,8 @@ class Player extends PIXI.Container {
     super();
 
     this.z = 1;
+    this._tilePosition = {};
+    this.moveDuration = 0;
   }
 
   set sprite(filename) {
@@ -13,17 +15,14 @@ class Player extends PIXI.Container {
     this.addChild(this._sprite);
   }
 
-  //get tilePosition() {
-  //  return {
-  //    x: Math.floor(this.x / 50),
-  //    y: Math.floor(this.y / 50)
-  //  }
-  //}
+  get tilePosition() {
+    return this._tilePosition;
+  }
 
-  //set tilePosition({x, y}) {
-  //  this.x = x * 50;
-  //  this.y = y * 50;
-  //}
+  set tilePosition({x, y}) {
+    this._tilePosition.x = x;
+    this._tilePosition.y = y;
+  }
 }
 
 module.exports = Player;

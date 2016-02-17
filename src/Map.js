@@ -25,9 +25,10 @@ class Map {
   initialize() {
     this.player = new Player();
     this.player.sprite = 'resources/fuzzball.png';
+
     this.player.tilePosition = {x: 5, y: 5};
     this.player.position.set(this.player.tilePosition.x * 50, this.player.tilePosition.y * 50);
-    this.player.moveDuration = 0;
+
     this.game.stage.addChild(this.player);
 
     window.player = this.player;
@@ -44,7 +45,7 @@ class Map {
         } else {
           tile.sprite = 'resources/wall.png';
           tile.solid = 1;
-          tile.z = 1;
+          tile.z = 0;
         }
 
         tile.tilePosition = {x, y};
@@ -127,8 +128,9 @@ class Map {
     if (this.player.moveDuration >= duration) {
       this.player.moveDuration = duration;
 
-      this.player.tilePosition.x = to.x;
-      this.player.tilePosition.y = to.y;
+      var x = to.x;
+      var y = to.y;
+      this.player.tilePosition = {x, y};
 
       this.path.shift();
       if (this.path.length < 1) {
@@ -138,14 +140,14 @@ class Map {
       }
     }
 
-    var tileX = this.player.tilePosition.x;
-    var tileY = this.player.tilePosition.y;
+    var tilePos = this.player.tilePosition;
+    var pos = this.player.position;
 
-    this.player.position.x = (tileX * 50) + (to.x * 50 - tileX * 50) *
-        (this.player.moveDuration / duration);
+    pos.x = tilePos.x * 50 + (to.x * 50 - tilePos.x * 50) *
+      (this.player.moveDuration / duration);
 
-    this.player.position.y = (tileY * 50) + (to.y * 50 - tileY * 50) *
-        (this.player.moveDuration / duration);
+    pos.y = tilePos.y * 50 + (to.y * 50 - tilePos.y * 50) *
+      (this.player.moveDuration / duration);
   }
 
   update() {
