@@ -1,5 +1,3 @@
-require('./astar');
-
 window.depthCompare = function(a, b) {
   if(a.z < b.z) {
     return -1;
