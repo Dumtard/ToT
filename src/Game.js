@@ -10,40 +10,51 @@ window.depthCompare = function(a, b) {
   return 0;
 }
 
+var Camera = require('./Camera');
+var Renderer = require('./Renderer');
+
 class Game {
   constructor() {
-    this.stage = new PIXI.Container();
+    this.size = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight;
 
-    let size = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight;
+    window.addEventListener('resize', this.resize.bind(this));
 
-    this.renderer = PIXI.autoDetectRenderer(
-      size, size, { antialias: false }
-    );
-    document.body.appendChild(this.renderer.view);
-
-    window.addEventListener('resize', () => {
-      let size = window.innerWidth < window.innerHeight ? window.innerWidth : window.innerHeight;
-      this.renderer.resize(size, size);
-      this.stage.scale.set(size / 550);
-    });
-    this.stage.scale.set(size / 550);
+    this.world = new PIXI.Container();
 
     var Map = require('./Map.js');
     this.map = new Map(this);
 
+    Renderer.registerWorld(this.world);
+    Camera.registerWorld(this.world);
+
     for (let x = 0; x < this.map.tiles.length; ++x) {
       for (let y = 0; y < this.map.tiles.length; ++y) {
-        this.stage.addChild(this.map.tiles[x][y]);
+        this.world.addChild(this.map.tiles[x][y]);
       }
     }
+    this.resize();
 
-    this.stage.children.sort(depthCompare);
+    this.world.children.sort(depthCompare);
 
     this.previous = Date.now() / 1000;
     this.current = Date.now() / 1000;
     this.delta = 0;
 
+    window.addEventListener('mousewheel', function(e) {
+      var scale = Camera.scale;
+      Camera.scale = {
+        width: scale.width + (Math.sign(e.wheelDelta) * -2),
+        height: scale.height + (Math.sign(e.wheelDelta) * -2)
+      };
+    });
+
     requestAnimationFrame(this.update.bind(this));
+  }
+
+  resize() {
+    Renderer.resize(this.size, this.size);
+    this.world.scale.set(this.size / 550);
+    //Camera.scale = {x: size / 550, y: size / 550};
   }
 
   update() {
@@ -53,7 +64,7 @@ class Game {
 
     this.map.update();
 
-    this.renderer.render(this.stage);
+    Renderer.render();
 
     requestAnimationFrame(this.update.bind(this));
   }

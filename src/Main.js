@@ -1,9 +1,8 @@
 (function() {
   'use strict';
 
-  var Game = require('./Game');
-
   loadPIXI('3.0.9').then(() => {
+    var Game = require('./Game');
     var game = new Game();
     window.game = game;
   });

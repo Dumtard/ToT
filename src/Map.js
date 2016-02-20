@@ -4,6 +4,10 @@ var mouse = require('./Mouse');
 
 var astar = require('./astar');
 
+var Camera = require('./Camera');
+
+window.camera = Camera;
+
 class Map {
   constructor(game) {
     this.game = game;
@@ -18,7 +22,44 @@ class Map {
 
     mouse.addEventListener('mouseup', (mouse) => {
       this.clearHighlight();
-      this.createPath();
+
+      if (!this.zooming) {
+        this.createPath();
+      }
+    });
+
+    var previousDistance = 0;
+    this.zooming = false;
+
+    window.addEventListener('touchmove', (e) => {
+      if (e.touches.length === 2) {
+        this.zooming = true;
+        var a = e.touches[0].screenX - e.touches[1].screenX;
+        var b = e.touches[0].screenY - e.touches[1].screenY;
+
+        var c = Math.sqrt(a * a + b * b);
+
+        if (previousDistance !== 0) {
+          var delta = c - previousDistance;
+
+          console.log(delta);
+
+          if (Math.abs(delta) > 1) {
+            var scale = Camera.scale;
+            Camera.scale = {
+              width: scale.width + (Math.sign(delta)),
+              height: scale.height + (Math.sign(delta))
+            };
+          }
+        }
+        previousDistance = c;
+      }
+    });
+
+    window.addEventListener('touchend', (e) => {
+      setTimeout(() => {
+        this.zooming = false;
+      }, 500);
     });
   }
 
@@ -29,20 +70,37 @@ class Map {
     this.player.tilePosition = {x: 5, y: 5};
     this.player.position.set(this.player.tilePosition.x * 50, this.player.tilePosition.y * 50);
 
-    this.game.stage.addChild(this.player);
+    this.game.world.addChild(this.player);
+
+    this.width = 21;
+    this.height = 21;
 
     window.player = this.player;
 
-    for (let x = 0; x < 11; ++x) {
+    Camera.follow(this.player);
+
+    for (let x = 0; x < this.width; ++x) {
       let tilesY = [];
-      for (let y = 0; y < 11; ++y) {
+      for (let y = 0; y < this.height; ++y) {
         let tile = new Tile();
-        if (Math.random() > 0.2) {
+        if (Math.random() > 0.15) {
           tile.sprite = 'resources/floor.png';
           tile.solid = 0;
           tile.z = 0;
 
         } else {
+          tile.sprite = 'resources/wall.png';
+          tile.solid = 1;
+          tile.z = 0;
+        }
+
+        if (y == 5 && x == 5) {
+          tile.sprite = 'resources/floor.png';
+          tile.solid = 0;
+          tile.z = 0;
+        }
+
+        if (y == 0 || x == 0 || y == this.height - 1 || x == this.height - 1) {
           tile.sprite = 'resources/wall.png';
           tile.solid = 1;
           tile.z = 0;
@@ -60,8 +118,8 @@ class Map {
 
   createPath() {
     let mouseTile = {
-      x: Math.floor(mouse.position().x / (50 * this.game.stage.scale.x)),
-      y: Math.floor(mouse.position().y / (50 * this.game.stage.scale.y))
+      x: Math.floor((mouse.position().x + Camera.position.x) / (50 * this.game.world.scale.x)),
+      y: Math.floor((mouse.position().y + Camera.position.y) / (50 * this.game.world.scale.y))
     };
 
     // Create path
@@ -85,8 +143,8 @@ class Map {
   clearHighlight() {
     // Clearing previous highlight
     let len = this.tiles.length;
-    for (let x = 0; x < 11; ++x) {
-      for (let y = 0; y < 11; ++y) {
+    for (let x = 0; x < this.width; ++x) {
+      for (let y = 0; y < this.height; ++y) {
         this.tiles[x][y].highlight = false;
       }
     }
@@ -94,8 +152,8 @@ class Map {
 
   createHighlight() {
     let mouseTile = {
-      x: Math.floor(mouse.position().x / (50 * this.game.stage.scale.x)),
-      y: Math.floor(mouse.position().y / (50 * this.game.stage.scale.y))
+      x: Math.floor((mouse.position().x + Camera.position.x) / (50 * this.game.world.scale.x)),
+      y: Math.floor((mouse.position().y + Camera.position.y) / (50 * this.game.world.scale.y))
     };
 
     if (!this.tiles[mouseTile.x] || !this.tiles[mouseTile.x][mouseTile.y]) {
@@ -114,12 +172,15 @@ class Map {
         this.tiles[newPath[i][0]][newPath[i][1]].highlight = true;
       }
     }
-    this.game.stage.children.sort(depthCompare);
+    this.game.world.children.sort(depthCompare);
   }
 
   highlight() {
     this.clearHighlight();
-    this.createHighlight();
+
+    if (!this.zooming) {
+      this.createHighlight();
+    }
   }
 
   interpolate(to, duration) {
@@ -156,6 +217,7 @@ class Map {
     //Move the player if I can.
     if (this.path.length > 0) {
       this.interpolate({x: this.path[0][0], y: this.path[0][1]}, 500);
+      Camera.update(this.player);
     }
   }
 }

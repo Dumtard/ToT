@@ -5,7 +5,7 @@ class Mouse {
       right: false,
       x: 0,
       y: 0,
-      touch: false
+      touches: []
     };
 
     this.callbacks = {
@@ -18,7 +18,7 @@ class Mouse {
       this.mouse.x = e.changedTouches[0].clientX;
       this.mouse.y = e.changedTouches[0].clientY;
       this.mouse.left = true;
-      this.mouse.touch = true;
+      this.mouse.touches = e.touches;
 
       let len = this.callbacks.mousedown.length;
       for (let i = 0; i < len; ++i) {
@@ -30,7 +30,7 @@ class Mouse {
       this.mouse.x = e.clientX;
       this.mouse.y = e.clientY;
       this.mouse.left = true;
-      this.mouse.touch = false;
+      this.mouse.touches = [];
 
       let len = this.callbacks.mousedown.length;
       for (let i = 0; i < len; ++i) {
@@ -42,7 +42,7 @@ class Mouse {
       this.mouse.x = e.changedTouches[0].clientX;
       this.mouse.y = e.changedTouches[0].clientY;
       this.mouse.left = false;
-      this.mouse.touch = true;
+      this.mouse.touches = e.touches;
 
       let len = this.callbacks.mouseup.length;
       for (let i = 0; i < len; ++i) {
@@ -54,7 +54,7 @@ class Mouse {
       this.mouse.x = e.clientX;
       this.mouse.y = e.clientY;
       this.mouse.left = false;
-      this.mouse.touch = false;
+      this.mouse.touches = [];
 
       let len = this.callbacks.mouseup.length;
       for (let i = 0; i < len; ++i) {
@@ -63,8 +63,9 @@ class Mouse {
     });
 
     window.addEventListener('touchmove', (e) => {
-      this.mouse.x = e.changedTouches[0].clientX;
-      this.mouse.y = e.changedTouches[0].clientY;
+      this.mouse.x = e.touches[0].clientX;
+      this.mouse.y = e.touches[0].clientY;
+      this.mouse.touches = e.touches;
 
       let len = this.callbacks.mousemove.length;
       for (let i = 0; i < len; ++i) {
@@ -75,6 +76,7 @@ class Mouse {
     window.addEventListener('mousemove', (e) => {
       this.mouse.x = e.clientX;
       this.mouse.y = e.clientY;
+      this.touches = [];
 
       let len = this.callbacks.mousemove.length;
       for (let i = 0; i < len; ++i) {
